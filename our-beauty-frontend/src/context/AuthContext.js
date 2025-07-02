@@ -15,7 +15,8 @@ export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
 
     // The base URL of your API. Make sure the port number matches your backend server.
-    const API_URL = 'https://localhost:7157';
+    // Change this line in both AuthContext.js and CartContext.js
+    const API_URL = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
         // This effect runs when the component mounts

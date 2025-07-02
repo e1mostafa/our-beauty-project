@@ -1,11 +1,9 @@
-﻿
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OurBeauty.API.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-
 
 namespace OurBeauty.API
 {
@@ -14,24 +12,27 @@ namespace OurBeauty.API
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Configure CORS policy to allow both local development and deployed Vercel frontend
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowReactApp", policy =>
                 {
-                    policy.WithOrigins("http://localhost:3000") // عنوان تطبيق الرياكت
-                          .AllowAnyHeader()
-                          .AllowAnyMethod();
+                    policy.WithOrigins(
+                            "http://localhost:3000", // Allow requests from your local React development server
+                            "https://ourbeautyproject.vercel.app/" // Allow requests from your deployed Vercel frontend
+                        )
+                        .AllowAnyHeader() // Allow all headers
+                        .AllowAnyMethod(); // Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
                 });
             });
 
             // Add services to the container.
-
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
-                // Define the security scheme (JWT Bearer)
+                // Configure Swagger to use JWT Bearer authentication
                 options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
                 {
                     Name = "Authorization",
@@ -42,46 +43,51 @@ namespace OurBeauty.API
                     Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\""
                 });
 
-                // Make sure swagger UI requires a Bearer token to be specified
                 options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
                 {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
-    });
+                    {
+                        new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+                        {
+                            Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                            {
+                                Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
             });
+
+            // Get the database connection string from appsettings.json
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
+
+            // Configure ASP.NET Core Identity
             builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            // Configure JWT Bearer Authentication
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-    };
-});
-            builder.Services.AddCors(/* ... */);
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                    ValidAudience = builder.Configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                };
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -90,26 +96,30 @@ namespace OurBeauty.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-            app.UseCors("AllowReactApp");
 
+            // Use HTTPS Redirection
             app.UseHttpsRedirection();
+
+            // Use Static Files (if serving any from wwwroot)
             app.UseStaticFiles();
+
+            // Enable routing
+            app.UseRouting();
+
+            // Apply the CORS policy. This must be placed after UseRouting() and before UseAuthentication()/UseAuthorization()
             app.UseCors("AllowReactApp");
 
-            app.UseAuthentication(); // أضف هذا
+            // Enable Authentication and Authorization
+            app.UseAuthentication();
             app.UseAuthorization();
 
-
+            // Map API controllers
             app.MapControllers();
-            // This entire block replaces the previous one
 
-            // Call the helper method to run it on startup
-            // Replace the existing SeedDatabase method with this one
-
-           
-
-            // This should be the very last line of the file
+            // Run the application
             app.Run();
         }
+        // The public void ConfigureServices(IServiceCollection services) method was removed from here
+        // as it's not standard for .NET 6+ minimal API Program.cs files.
     }
 }

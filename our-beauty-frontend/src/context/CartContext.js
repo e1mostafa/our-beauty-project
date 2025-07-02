@@ -3,6 +3,7 @@ import { useAuth } from './AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 const CartContext = createContext();
+// Change this line in both AuthContext.js and CartContext.js
 
 export const useCart = () => {
     return useContext(CartContext);
@@ -14,7 +15,8 @@ export const CartProvider = ({ children }) => {
     const navigate = useNavigate(); // Add this line
 
     // Make sure this port number matches your backend server
-    const API_URL = 'https://localhost:7157';
+    // Change this line in both AuthContext.js and CartContext.js
+    const API_URL = process.env.REACT_APP_API_URL;
 
     const fetchCart = useCallback(async () => {
         if (!token) {
