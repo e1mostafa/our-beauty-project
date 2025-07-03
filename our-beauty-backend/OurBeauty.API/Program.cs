@@ -21,7 +21,8 @@ namespace OurBeauty.API
                     policy.WithOrigins(
                             "http://localhost:3000", // Allow requests from your local React development server
                             "https://ourbeautyproject.vercel.app/" ,// Allow requests from your deployed Vercel frontend
-                            "http://ourbeautyapi.runasp.net"
+                            "http://ourbeautyapi.runasp.net",
+                             "https://ourbeautyapi.runasp.net"
                         )
                         .AllowAnyHeader() // Allow all headers
                         .AllowAnyMethod(); // Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
