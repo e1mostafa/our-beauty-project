@@ -7,7 +7,7 @@ const ProductList = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
 
-    const API_URL = 'https://localhost:7157'; // Make sure this port is correct
+    const API_URL = process.env.REACT_APP_API_URL; // Make sure this port is correct
 
     const fetchProducts = async (term) => {
         setLoading(true);

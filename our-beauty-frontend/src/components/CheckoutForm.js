@@ -12,7 +12,7 @@ const CheckoutForm = ({ clientSecret }) => {
     const { token } = useAuth();
     const [isProcessing, setIsProcessing] = useState(false);
 
-    const API_URL = 'https://localhost:7157';
+    const API_URL = process.env.REACT_APP_API_URL;;
 
     const handleSubmit = async (event) => {
         event.preventDefault();
