@@ -4,15 +4,17 @@ import { useAuth } from '../context/AuthContext';
 import { Container, TextField, Button, Typography, Box, CircularProgress } from '@mui/material';
 import toast from 'react-hot-toast';
 
+// This is the most important part
+const API_URL = process.env.REACT_APP_API_URL;
+
 const AdminProductEdit = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { token } = useAuth();
     const [product, setProduct] = useState({ name: '', price: '', description: '', imageUrl: '' });
-    const [selectedFile, setSelectedFile] = useState(null); // To hold the selected image file
+    const [selectedFile, setSelectedFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const isNew = !id;
-    const API_URL = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
         if (!isNew) {
@@ -41,7 +43,6 @@ const AdminProductEdit = () => {
 
         let imageUrl = product.imageUrl;
 
-        // 1. If a new file is selected, upload it first
         if (selectedFile) {
             const formData = new FormData();
             formData.append('file', selectedFile);
@@ -56,7 +57,7 @@ const AdminProductEdit = () => {
                 if (!uploadResponse.ok) throw new Error('Image upload failed');
 
                 const uploadResult = await uploadResponse.json();
-                imageUrl = uploadResult.filePath; // Get the new image path
+                imageUrl = uploadResult.filePath;
             } catch (error) {
                 toast.error('Error uploading image.');
                 setLoading(false);
@@ -64,12 +65,10 @@ const AdminProductEdit = () => {
             }
         }
 
-        // 2. Prepare product data with the correct image URL
         const productData = { ...product, imageUrl: imageUrl, price: parseFloat(product.price) };
         const url = isNew ? `${API_URL}/api/products` : `${API_URL}/api/products/${id}`;
         const method = isNew ? 'POST' : 'PUT';
 
-        // 3. Save the product data
         try {
             const productResponse = await fetch(url, {
                 method: method,
