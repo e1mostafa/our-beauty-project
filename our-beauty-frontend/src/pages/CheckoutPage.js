@@ -11,7 +11,7 @@ const CheckoutPage = () => {
     const { token } = useAuth();
     const { cart, fetchCart } = useCart();
     const navigate = useNavigate();
-    const API_URL = process.env.REACT_APP_API_URL;
+    const API_URL = 'https://ourbeautyapi.runasp.net';
 
     const handleOfflineOrder = async (paymentMethod) => {
         if (!token) return toast.error("Please log in to place an order.");
