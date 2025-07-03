@@ -8,7 +8,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 const AdminProductList = () => {
   const [products, setProducts] = useState([]);
   const { token } = useAuth();
-    const API_URL = 'https://ourbeautyapi.runasp.net';// Make sure this port is correct
+    const API_URL = process.env.REACT_APP_API_URL; // Make sure this port is correct
 
   useEffect(() => {
     const fetchProducts = async () => {

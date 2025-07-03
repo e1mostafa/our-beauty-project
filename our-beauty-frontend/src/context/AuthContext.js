@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
 
     // The base URL of your API. Make sure the port number matches your backend server.
     // Change this line in both AuthContext.js and CartContext.js
-    const API_URL = 'https://ourbeautyapi.runasp.net';
+    const API_URL = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
         // This effect runs when the component mounts

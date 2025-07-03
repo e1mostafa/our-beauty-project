@@ -5,7 +5,7 @@ import { Container, TextField, Button, Typography, Box, CircularProgress } from 
 import toast from 'react-hot-toast';
 
 // This is the most important part
-const API_URL = 'https://ourbeautyapi.runasp.net';
+const API_URL = process.env.REACT_APP_API_URL;
 
 const AdminProductEdit = () => {
     const { id } = useParams();

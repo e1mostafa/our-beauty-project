@@ -16,7 +16,7 @@ export const CartProvider = ({ children }) => {
 
     // Make sure this port number matches your backend server
     // Change this line in both AuthContext.js and CartContext.js
-    const API_URL = 'https://ourbeautyapi.runasp.net';
+    const API_URL = process.env.REACT_APP_API_URL;
 
     const fetchCart = useCallback(async () => {
         if (!token) {

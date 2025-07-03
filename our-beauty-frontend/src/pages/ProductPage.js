@@ -10,7 +10,7 @@ const ProductPage = () => {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const { addToCart } = useCart();
-    const API_URL = 'https://ourbeautyapi.runasp.net'; // Make sure port is correct
+    const API_URL = process.env.REACT_APP_API_URL;// Make sure port is correct
 
     useEffect(() => {
         const fetchProduct = async () => {
