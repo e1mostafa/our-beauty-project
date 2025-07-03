@@ -12,7 +12,7 @@ const AdminProductEdit = () => {
     const [selectedFile, setSelectedFile] = useState(null); // To hold the selected image file
     const [loading, setLoading] = useState(false);
     const isNew = !id;
-    const API_URL = 'https://localhost:7157';
+    const API_URL = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
         if (!isNew) {

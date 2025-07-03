@@ -23,24 +23,29 @@ namespace OurBeauty.API.Controllers
                 return BadRequest("No file uploaded.");
             }
 
-            // The path to the wwwroot/images folder
-            var uploadsFolderPath = Path.Combine(_webHostEnvironment.WebRootPath, "images");
+            // Get the physical path to wwwroot
+            var webRootPath = _webHostEnvironment.WebRootPath;
+            if (string.IsNullOrEmpty(webRootPath))
+            {
+                // Fallback for some hosting environments
+                webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            }
+
+            var uploadsFolderPath = Path.Combine(webRootPath, "images");
+
             if (!Directory.Exists(uploadsFolderPath))
             {
                 Directory.CreateDirectory(uploadsFolderPath);
             }
 
-            // Create a unique filename to avoid conflicts
-            var uniqueFileName = Guid.NewGuid().ToString() + "_" + file.FileName;
+            var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
             var filePath = Path.Combine(uploadsFolderPath, uniqueFileName);
 
-            // Save the file
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await file.CopyToAsync(stream);
             }
 
-            // Return the public path to the file
             var publicPath = $"/images/{uniqueFileName}";
             return Ok(new { filePath = publicPath });
         }
