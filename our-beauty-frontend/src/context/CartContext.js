@@ -79,28 +79,31 @@ export const CartProvider = ({ children }) => {
             console.error("Failed to remove item from cart:", error);
         }
     };
-    const placeOrder = async () => {
+    const placeOrder = async (paymentMethod) => { // Remember we added paymentMethod earlier
         if (!token) {
-            alert("Please log in to place an order.");
+            toast.error("Please log in to place an order."); // Using toast here
             return;
         }
         try {
             const response = await fetch(`${API_URL}/api/Orders`, {
                 method: 'POST',
                 headers: {
+                    'Content-Type': 'application/json', // Important to include this header
                     'Authorization': `Bearer ${token}`,
                 },
+                body: JSON.stringify({ paymentMethod }) // Send the payment method in the body
             });
 
             if (response.ok) {
-                alert("Order placed successfully!");
-                fetchCart(); // This will fetch the now-empty cart
-                navigate('/order-success'); // Redirect to a success page
+                toast.success("Order placed successfully!"); // Replaced alert with toast
+                fetchCart();
+                navigate('/order-success');
             } else {
-                alert("Failed to place order.");
+                toast.error("Failed to place order."); // Replaced alert with toast
             }
         } catch (error) {
             console.error("Failed to place order:", error);
+            toast.error("An error occurred while placing your order.");
         }
     };
 
