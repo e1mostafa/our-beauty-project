@@ -2,8 +2,8 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
 import { useAuth } from './AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+
 const CartContext = createContext();
-// Change this line in both AuthContext.js and CartContext.js
 
 export const useCart = () => {
     return useContext(CartContext);
@@ -11,18 +11,16 @@ export const useCart = () => {
 
 export const CartProvider = ({ children }) => {
     const [cart, setCart] = useState(null);
-    const { token } = useAuth();
-    const navigate = useNavigate(); // Add this line
+    const { token, logout } = useAuth(); // Get the logout function from AuthContext
+    const navigate = useNavigate();
 
-    // Make sure this port number matches your backend server
-    // Change this line in both AuthContext.js and CartContext.js
     const API_URL = process.env.REACT_APP_API_URL;
 
     const fetchCart = useCallback(async () => {
         if (!token) {
-            setCart(null); // Clear the cart if the user logs out
+            setCart(null);
             return;
-        };
+        }
 
         try {
             const response = await fetch(`${API_URL}/api/Cart`, {
@@ -30,38 +28,46 @@ export const CartProvider = ({ children }) => {
                     'Authorization': `Bearer ${token}`,
                 },
             });
+
             if (response.ok) {
                 const data = await response.json();
                 setCart(data);
+            } else if (response.status === 401) {
+                // --- THIS IS THE IMPROVEMENT ---
+                // If the token is invalid, log the user out automatically.
+                toast.error("Your session has expired. Please log in again.");
+                logout();
             }
         } catch (error) {
             console.error("Failed to fetch cart:", error);
         }
-    }, [token]);
+    }, [token, logout, API_URL]); // Added dependencies
 
-    // Fetch the cart when the token changes (e.g., on login)
     useEffect(() => {
         fetchCart();
     }, [fetchCart]);
 
     const addToCart = async (productId, quantity = 1) => {
         if (!token) {
-            toast.error("Please log in to add items to your cart."); // Replace alert
+            toast.error("Please log in to add items to your cart.");
             return;
         }
         try {
-            // This URL should correctly resolve to /api/Cart/items...
-            await fetch(`${API_URL}/api/Cart/items?productId=${productId}&quantity=${quantity}`, {
+            const response = await fetch(`${API_URL}/api/Cart/items?productId=${productId}&quantity=${quantity}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
             });
-            fetchCart();
-            toast.success("Item added to cart!"); // Add a success toast
+            if (response.ok) {
+                fetchCart();
+                toast.success("Item added to cart!");
+            } else {
+                toast.error("Failed to add item.");
+            }
         } catch (error) {
             console.error("Failed to add item to cart:", error);
-            toast.error("Failed to add item."); // Add an error toast
+            toast.error("Failed to add item.");
         }
     };
 
@@ -74,32 +80,33 @@ export const CartProvider = ({ children }) => {
                     'Authorization': `Bearer ${token}`,
                 },
             });
-            fetchCart(); // Re-fetch the cart to show the changes
+            fetchCart();
         } catch (error) {
             console.error("Failed to remove item from cart:", error);
         }
     };
-    const placeOrder = async (paymentMethod) => { // Remember we added paymentMethod earlier
+
+    const placeOrder = async (paymentMethod) => {
         if (!token) {
-            toast.error("Please log in to place an order."); // Using toast here
+            toast.error("Please log in to place an order.");
             return;
         }
         try {
             const response = await fetch(`${API_URL}/api/Orders`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json', // Important to include this header
+                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({ paymentMethod }) // Send the payment method in the body
+                body: JSON.stringify({ paymentMethod })
             });
 
             if (response.ok) {
-                toast.success("Order placed successfully!"); // Replaced alert with toast
+                toast.success("Order placed successfully!");
                 fetchCart();
                 navigate('/order-success');
             } else {
-                toast.error("Failed to place order."); // Replaced alert with toast
+                toast.error("Failed to place order.");
             }
         } catch (error) {
             console.error("Failed to place order:", error);
@@ -107,15 +114,12 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-
     const value = {
         cart,
         addToCart,
         removeFromCart,
-        placeOrder, // Expose the new function here
+        placeOrder,
     };
 
-
-   
     return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
