@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Container, TextField, Button, Typography, Box, CircularProgress } from '@mui/material';
 import toast from 'react-hot-toast';
 
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = 'https://ourbeautyapi.runasp.net';
 
 const AdminProductEdit = () => {
     const { id } = useParams();
