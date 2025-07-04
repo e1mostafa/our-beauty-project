@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import { Container, TextField, Button, Typography, Box, CircularProgress } from '@mui/material';
 import toast from 'react-hot-toast';
 
-// This is the most important part
 const API_URL = process.env.REACT_APP_API_URL;
 
 const AdminProductEdit = () => {
@@ -26,7 +25,8 @@ const AdminProductEdit = () => {
                     setLoading(false);
                 });
         }
-    }, [id, isNew]);
+        // FIX 1: Add API_URL to the dependency array
+    }, [id, isNew, API_URL]);
 
     const handleFileChange = (event) => {
         setSelectedFile(event.target.files[0]);
@@ -50,7 +50,10 @@ const AdminProductEdit = () => {
             try {
                 const uploadResponse = await fetch(`${API_URL}/api/fileupload`, {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        // FIX 2: Do NOT set 'Content-Type'. The browser will do it correctly for FormData.
+                    },
                     body: formData,
                 });
 
