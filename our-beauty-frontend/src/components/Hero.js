@@ -7,7 +7,7 @@ const Hero = () => {
     const API_URL = process.env.REACT_APP_API_URL; // Make sure this port is correct
 
     // The relative path to your new image in the wwwroot folder
-    const heroImageUrl = '/hero-background.png';
+    const heroImageUrl = '/images/hero-background.png';
 
     return (
         <Box sx={{
